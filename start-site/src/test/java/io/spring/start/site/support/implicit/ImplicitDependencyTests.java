@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2021 the original author or authors.
+ * Copyright 2012-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
  * Tests for {@link ImplicitDependency}.
  *
  * @author Stephane Nicoll
+ * @author Andy Wilkinson
  */
 class ImplicitDependencyTests {
 
@@ -43,6 +44,31 @@ class ImplicitDependencyTests {
 		Build build = mock(Build.class);
 		dependency.customize(build);
 		verify(buildCustomizer).accept(build);
+	}
+
+	@Test
+	void customizeBuildWhenAllPredicatesAreTrueInvokesConsumer() {
+		Consumer<Build> buildCustomizer = mockBuildCustomizer();
+		ImplicitDependency dependency = new Builder().match((build) -> true)
+			.match((build) -> true)
+			.match((build) -> true)
+			.customizeBuild(buildCustomizer)
+			.build();
+		Build build = mock(Build.class);
+		dependency.customize(build);
+		verify(buildCustomizer).accept(build);
+	}
+
+	@Test
+	void customizeBuildWhenPredicatesAreNotAllTrueDoesNotInvokeConsumer() {
+		Consumer<Build> buildCustomizer = mockBuildCustomizer();
+		ImplicitDependency dependency = new Builder().match((build) -> false)
+			.match((build) -> true)
+			.customizeBuild(buildCustomizer)
+			.build();
+		Build build = mock(Build.class);
+		dependency.customize(build);
+		verifyNoInteractions(buildCustomizer);
 	}
 
 	@Test
@@ -66,7 +92,8 @@ class ImplicitDependencyTests {
 	void customizeBuildWithMatchingDependencyInvokesConsumer() {
 		Consumer<Build> buildCustomizer = mockBuildCustomizer();
 		ImplicitDependency dependency = new Builder().matchAnyDependencyIds("test", "another")
-				.customizeBuild(buildCustomizer).build();
+			.customizeBuild(buildCustomizer)
+			.build();
 		Build build = new MavenBuild();
 		build.dependencies().add("another", mock(Dependency.class));
 		dependency.customize(build);
@@ -77,7 +104,8 @@ class ImplicitDependencyTests {
 	void customizeBuildWithNoMatchingDependencyDoesNotInvokeConsumer() {
 		Consumer<Build> buildCustomizer = mockBuildCustomizer();
 		ImplicitDependency dependency = new Builder().matchAnyDependencyIds("test", "another")
-				.customizeBuild(buildCustomizer).build();
+			.customizeBuild(buildCustomizer)
+			.build();
 		Build build = new MavenBuild();
 		build.dependencies().add("no-match", mock(Dependency.class));
 		dependency.customize(build);
@@ -87,8 +115,9 @@ class ImplicitDependencyTests {
 	@Test
 	void customizeHelpDocumentWhenPredicateIsTrueInvokesConsumer() {
 		Consumer<HelpDocument> buildCustomizer = mockHelpDocumentCustomizer();
-		ImplicitDependency dependency = new Builder().match((build) -> true).customizeHelpDocument(buildCustomizer)
-				.build();
+		ImplicitDependency dependency = new Builder().match((build) -> true)
+			.customizeHelpDocument(buildCustomizer)
+			.build();
 		HelpDocument helpDocument = mock(HelpDocument.class);
 		Build build = mock(Build.class);
 		dependency.customize(helpDocument, build);
@@ -98,8 +127,9 @@ class ImplicitDependencyTests {
 	@Test
 	void customizeHelpDocumentWhenPredicateIsFalseDoesNotInvokeConsumer() {
 		Consumer<HelpDocument> buildCustomizer = mockHelpDocumentCustomizer();
-		ImplicitDependency dependency = new Builder().match((build) -> false).customizeHelpDocument(buildCustomizer)
-				.build();
+		ImplicitDependency dependency = new Builder().match((build) -> false)
+			.customizeHelpDocument(buildCustomizer)
+			.build();
 		HelpDocument helpDocument = mock(HelpDocument.class);
 		Build build = mock(Build.class);
 		dependency.customize(helpDocument, build);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 the original author or authors.
+ * Copyright 2012-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,30 +35,31 @@ import static org.mockito.Mockito.mock;
 class SpringRestDocsProjectGenerationConfigurationTests {
 
 	private final ProjectAssetTester projectTester = new ProjectAssetTester()
-			.withConfiguration(SpringRestDocsProjectGenerationConfiguration.class);
+		.withConfiguration(SpringRestDocsProjectGenerationConfiguration.class);
 
 	@Test
-	@SuppressWarnings("rawtypes")
 	void springRestDocsCustomizerMaven() {
 		MutableProjectDescription description = new MutableProjectDescription();
 		description.setBuildSystem(new MavenBuildSystem());
 		description.addDependency("restdocs", mock(Dependency.class));
-		this.projectTester.configure(description, (context) -> assertThat(context).getBeans(BuildCustomizer.class)
-				.containsKeys("restDocsMavenBuildCustomizer").doesNotContainKeys("restDocsGradleBuildCustomizer"));
+		this.projectTester.configure(description,
+				(context) -> assertThat(context).getBeans(BuildCustomizer.class)
+					.containsKeys("restDocsMavenBuildCustomizer")
+					.doesNotContainKeys("restDocsGradleBuildCustomizer"));
 	}
 
 	@Test
-	@SuppressWarnings("rawtypes")
 	void springRestDocsCustomizerGradle() {
 		MutableProjectDescription description = new MutableProjectDescription();
 		description.setBuildSystem(new GradleBuildSystem());
 		description.addDependency("restdocs", mock(Dependency.class));
-		this.projectTester.configure(description, (context) -> assertThat(context).getBeans(BuildCustomizer.class)
-				.containsKeys("restDocsGradleBuildCustomizer").doesNotContainKeys("restDocsMavenBuildCustomizer"));
+		this.projectTester.configure(description,
+				(context) -> assertThat(context).getBeans(BuildCustomizer.class)
+					.containsKeys("restDocsGradleBuildCustomizer")
+					.doesNotContainKeys("restDocsMavenBuildCustomizer"));
 	}
 
 	@Test
-	@SuppressWarnings("rawtypes")
 	void springRestDocsNotAppliedIfRestDocsNotSelected() {
 		MutableProjectDescription description = new MutableProjectDescription();
 		description.setBuildSystem(new GradleBuildSystem());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 the original author or authors.
+ * Copyright 2012-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import io.spring.initializr.generator.buildsystem.BuildSystem;
@@ -131,10 +130,18 @@ class ProjectGenerationIntegrationTests {
 	}
 
 	Stream<Arguments> parameters() {
-		List<Version> bootVersions = this.metadata.getBootVersions().getContent().stream()
-				.map((element) -> Version.parse(element.getId())).collect(Collectors.toList());
-		String defaultJvmVersion = this.metadata.getJavaVersions().getContent().stream()
-				.filter(DefaultMetadataElement::isDefault).map(MetadataElement::getId).findAny().orElse("11");
+		List<Version> bootVersions = this.metadata.getBootVersions()
+			.getContent()
+			.stream()
+			.map((element) -> Version.parse(element.getId()))
+			.toList();
+		String defaultJvmVersion = this.metadata.getJavaVersions()
+			.getContent()
+			.stream()
+			.filter(DefaultMetadataElement::isDefault)
+			.map(MetadataElement::getId)
+			.findAny()
+			.orElse("11");
 		List<Packaging> packagings = Arrays.asList(new JarPackaging(), new WarPackaging());
 		List<Language> languages = Arrays.asList(Language.forId(KotlinLanguage.ID, defaultJvmVersion),
 				Language.forId(JavaLanguage.ID, defaultJvmVersion));
@@ -174,7 +181,7 @@ class ProjectGenerationIntegrationTests {
 		processBuilder.redirectError(output.toFile());
 		processBuilder.redirectOutput(output.toFile());
 		assertThat(processBuilder.start().waitFor()).describedAs(String.join("\n", Files.readAllLines(output)))
-				.isEqualTo(0);
+			.isEqualTo(0);
 	}
 
 	private ProcessBuilder createProcessBuilder(BuildSystem buildSystem) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2021 the original author or authors.
+ * Copyright 2012-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,24 +34,26 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Maciej Walkowiak
  * @author Stephane Nicoll
+ * @author Eddú Meléndez
+ * @author Chris Bono
  */
 class TestcontainersProjectGenerationConfigurationTests extends AbstractExtensionTests {
 
 	@Test
 	void buildWithOnlyTestContainers() {
 		assertThat(generateProject("testcontainers")).mavenBuild()
-				.hasBom("org.testcontainers", "testcontainers-bom", "${testcontainers.version}")
-				.hasDependency(getDependency("testcontainers"));
+			.hasBom("org.testcontainers", "testcontainers-bom", "${testcontainers.version}")
+			.hasDependency(getDependency("testcontainers"));
 	}
 
 	@ParameterizedTest
 	@MethodSource("supportedEntriesBuild")
 	void buildWithSupportedEntries(String springBootDependencyId, String testcontainersArtifactId) {
 		assertThat(generateProject("testcontainers", springBootDependencyId)).mavenBuild()
-				.hasBom("org.testcontainers", "testcontainers-bom", "${testcontainers.version}")
-				.hasDependency(getDependency(springBootDependencyId))
-				.hasDependency("org.testcontainers", testcontainersArtifactId, null, "test")
-				.hasDependency(getDependency("testcontainers"));
+			.hasBom("org.testcontainers", "testcontainers-bom", "${testcontainers.version}")
+			.hasDependency(getDependency(springBootDependencyId))
+			.hasDependency("org.testcontainers", testcontainersArtifactId, null, "test")
+			.hasDependency(getDependency("testcontainers"));
 	}
 
 	static Stream<Arguments> supportedEntriesBuild() {
@@ -65,14 +67,15 @@ class TestcontainersProjectGenerationConfigurationTests extends AbstractExtensio
 				Arguments.arguments("db2", "db2"), Arguments.arguments("kafka", "kafka"),
 				Arguments.arguments("kafka-streams", "kafka"), Arguments.arguments("mariadb", "mariadb"),
 				Arguments.arguments("mysql", "mysql"), Arguments.arguments("postgresql", "postgresql"),
-				Arguments.arguments("oracle", "oracle-xe"), Arguments.arguments("sqlserver", "mssqlserver"));
+				Arguments.arguments("oracle", "oracle-xe"), Arguments.arguments("pulsar", "pulsar"),
+				Arguments.arguments("pulsar-reactive", "pulsar"), Arguments.arguments("sqlserver", "mssqlserver"));
 	}
 
 	@ParameterizedTest
 	@MethodSource("supportedEntriesHelpDocument")
 	void linkToSupportedEntriesWhenTestContainerIsPresentIsAdded(String dependencyId, String docHref) {
 		assertHelpDocument("testcontainers", dependencyId)
-				.contains("https://www.testcontainers.org/modules/" + docHref);
+			.contains("https://www.testcontainers.org/modules/" + docHref);
 	}
 
 	@ParameterizedTest
@@ -83,6 +86,8 @@ class TestcontainersProjectGenerationConfigurationTests extends AbstractExtensio
 
 	static Stream<Arguments> supportedEntriesHelpDocument() {
 		return Stream.of(Arguments.arguments("amqp", "rabbitmq/"),
+				Arguments.arguments("cloud-starter-consul-config", "consul/"),
+				Arguments.arguments("cloud-starter-vault-config", "vault/"),
 				Arguments.arguments("data-cassandra", "databases/cassandra/"),
 				Arguments.arguments("data-cassandra-reactive", "databases/cassandra/"),
 				Arguments.arguments("data-couchbase", "databases/couchbase/"),
@@ -94,15 +99,16 @@ class TestcontainersProjectGenerationConfigurationTests extends AbstractExtensio
 				Arguments.arguments("data-r2dbc", "databases/r2dbc/"), Arguments.arguments("db2", "databases/db2"),
 				Arguments.arguments("kafka", "kafka/"), Arguments.arguments("kafka-streams", "kafka/"),
 				Arguments.arguments("mariadb", "databases/mariadb/"), Arguments.arguments("mysql", "databases/mysql/"),
-				Arguments.arguments("postgresql", "databases/postgres/"),
 				Arguments.arguments("oracle", "databases/oraclexe/"),
+				Arguments.arguments("postgresql", "databases/postgres/"), Arguments.arguments("pulsar", "pulsar/"),
+				Arguments.arguments("pulsar-reactive", "pulsar/"),
 				Arguments.arguments("sqlserver", "databases/mssqlserver/"));
 	}
 
 	@Test
 	void linkToSupportedEntriesWhenTwoMatchesArePresentOnlyAddLinkOnce() {
 		assertHelpDocument("testcontainers", "data-mongodb", "data-mongodb-reactive")
-				.containsOnlyOnce("https://www.testcontainers.org/modules/databases/mongodb/");
+			.containsOnlyOnce("https://www.testcontainers.org/modules/databases/mongodb/");
 	}
 
 	private ProjectStructure generateProject(String... dependencies) {
